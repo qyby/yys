@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
+#include <stdlib.h>//有srand()函数
 #include <string.h>
 #include <unistd.h>  //含有sleep函数，秒，linux专有
 //#include  <system.h> //含有usleep函数，微秒
+#include <time.h>//有time(NULL)函数
 using namespace std;
 class Shishen{
 public:
@@ -62,6 +63,18 @@ public:
 }
 };
 */
+	class Skill{
+    public:
+    int skillNumber;
+	double gongjibili; //攻击比例
+	double bilijianfang;
+	Skill(){};
+	Skill(int sn,double gjbl,double bljf){
+	skillNumber=sn;
+	gongjibili=gjbl;
+	bilijianfang=bljf;
+	};
+	};
 class Zhanchang{
 public:
 	//Zhanchangshishen AA;
@@ -71,8 +84,9 @@ public:
 	Shishen B;
 	int jindu;
 	int zhandoujieshu;
+	Skill *skill;
 Zhanchang(){}
-Zhanchang(Shishen a,Shishen b){
+Zhanchang(Shishen a,Shishen b,Skill *sk){
 	//AA=Zhanchangshishen(a);
 	//BB=Zhanchangshishen(b);
 	A=a;
@@ -81,6 +95,7 @@ Zhanchang(Shishen a,Shishen b){
 	B.fightInit();
 	jindu=0;
 	zhandoujieshu=0;
+	skill=sk;
 }
 	void dayinzhanchang(){
 	system("clear");
@@ -92,29 +107,48 @@ Zhanchang(Shishen a,Shishen b){
 	sleep(1);
 	if(jindu==0){
 	jindu=1;
-	if(beat(A,B)==1){
+	if(beat(A,B,skill)==1){
 	printf("你获得了胜利！\n");
+sleep(1);
+   jiesuan(A,B);
 	}
 	}else{
 	jindu=0;
-	if(beat(B,A)==1){
+	if(beat(B,A,skill)==1){
 	printf("失败！\n");
 	}
 	}
 }
 }
-	int beat(Shishen &gong,Shishen &fang){
+double atk(Shishen gong,Shishen fang,int skillNumber,Skill *sk,int &bao){
+double nigong;
+double shigong;
+srand(time(NULL));
+if(rand()%100<gong.baoji*100){
+    bao=1;
+}else{
+bao=0;
+}
+nigong=gong.gongji*sk[skillNumber].gongjibili*pow(gong.baojishanghai,bao);
+shigong=nigong*350/(300+fang.fangyu*(1-sk[skillNumber].bilijianfang));
+return shigong;
+}
+	int beat(Shishen &gong,Shishen &fang,Skill *sk){
+	    double  shigong=0;
+	    int bao=0;
+	    shigong=atk(gong,fang,1,sk,bao);
 	dayinzhanchang();
-	printf("%s对%s造成了%d点伤害\n",gong.name,fang.name,(int)gong.gongji);
+	printf("%s对%s造成了\e[3%d;1m %d \e[0m点伤害\n",gong.name,fang.name,7-bao*4,(int)shigong);
 	sleep(1);
-	if(fang.zhanchangshengming<=gong.gongji){
+	if(fang.zhanchangshengming<=shigong){
+    fang.zhanchangshengming=0;
 	dayinzhanchang();
 	printf("%s死亡了！\n",fang.name);
-	jiesuan(gong,fang);
+
 	zhandoujieshu=1;
 	return 1;
 	}else{
-	fang.zhanchangshengming=fang.zhanchangshengming-gong.gongji;
+	fang.zhanchangshengming=fang.zhanchangshengming-shigong;
 	return 0;
 }
 }
@@ -122,9 +156,9 @@ void  chongsuanmianban(Shishen &a){
 a.gongji=a.chushigongji*pow(1.055,a.level-1);
 a.shengming=a.chushishengming*pow(1.048,a.level-1);
 a.fangyu=a.chushifangyu*pow(1.026,a.level-1);
-printf("攻击+%d\n",(int)(a.chushigongji*pow(1.055,a.level-1)-a.chushigongji*pow(1.055,a.level-2)));
-printf("生命+%d\n",(int)(a.chushishengming*pow(1.048,a.level-1)-a.chushishengming*pow(1.048,a.level-2)));
-printf("防御+%d\n",(int)(a.chushifangyu*pow(1.026,a.level-1)-a.chushifangyu*pow(1.026,a.level-2)));
+printf("攻击 +%d\n",(int)(a.chushigongji*pow(1.055,a.level-1)-a.chushigongji*pow(1.055,a.level-2)));
+printf("生命 +%d\n",(int)(a.chushishengming*pow(1.048,a.level-1)-a.chushishengming*pow(1.048,a.level-2)));
+printf("防御 +%d\n",(int)(a.chushifangyu*pow(1.026,a.level-1)-a.chushifangyu*pow(1.026,a.level-2)));
 };
     void shengji(Shishen &a){
     long int shengjijinyan=0;
@@ -135,9 +169,9 @@ printf("防御+%d\n",(int)(a.chushifangyu*pow(1.026,a.level-1)-a.chushifangyu*po
     }
     while(a.jinyan>=shengjijinyan){
     a.jinyan=a.jinyan-shengjijinyan;
-    a.level++;
-    printf("升级啦！\n");
+    printf("恭喜你升到了%d级\n",++a.level);
     chongsuanmianban(a);
+sleep(1);
      if(a.level%2==1){
         shengjijinyan=(long int)(2.5*pow(a.level,3)+25*pow(a.level,2)-12.5*a.level+165);
     }else{
@@ -147,6 +181,7 @@ printf("防御+%d\n",(int)(a.chushifangyu*pow(1.026,a.level-1)-a.chushifangyu*po
     }
    void jiesuan(Shishen &a,Shishen &b){
    a.jinyan=a.jinyan+b.level*30+200;
+   printf("经验值 +%d\n",b.level*30+200);
    shengji(a);
 
  	if((fp=fopen("xianyoushishen.dat","wb"))==NULL){
@@ -157,6 +192,8 @@ printf("防御+%d\n",(int)(a.chushifangyu*pow(1.026,a.level-1)-a.chushifangyu*po
 	fclose(fp);
    }
 	};
+
+
 //*******************************************以上为类*******************************************
 
 int main(){
@@ -166,7 +203,10 @@ int main(){
 	Shishen xyss;
 	Shishen diren1;
 	Zhanchang zc;
+int tshengjijinyan;
+Skill skill[10];
 
+skill[1]=Skill(1,1,0);
 if ( access("./a", F_OK)){
 	if((fp1=fopen("xianyoushishen.dat","wb"))==NULL){
 		printf("read save failed!");
@@ -187,6 +227,9 @@ if ( access("./a", F_OK)){
 	xyss.sudu=100;
 	xyss.baoji=0.1;
 	xyss.baojishanghai=1.5;
+  xyss.chushigongji=124;
+xyss.chushifangyu=65;
+xyss.chushishengming=918;
 	fwrite(&xyss,sizeof(xyss),1,fp1);
 	fclose(fp1);
 
@@ -221,16 +264,16 @@ system("clear");
 //***********************************************以上为数据准备***********************************************
 	while(0==q){
 	system("clear");
-	printf("======阴阳师======\n");
-	printf(" 1 查看式神属性\n");
-	printf(" 2   开始战斗\n");
-	printf(" 3     退出\n");
+	printf("=========阴阳师=========\n");
+	printf("    1 查看式神属性\n");
+	printf("    2   开始战斗\n");
+	printf("    3     退出\n");
 	c=getchar();
 
 switch(c){
 	case '1':system("clear");getchar();
-		printf("======阴阳师======\n");
-		printf("     式神属性\n");
+		printf("=========阴阳师=========\n");
+		printf("        式神属性\n");
 	if((fp2=fopen("xianyoushishen.dat","rb"))==NULL){
 		printf("cant open file");
 		exit(0);
@@ -241,7 +284,12 @@ switch(c){
         printf("攻击：%4d    生命：%4d\n",(int)xyss.gongji,(int)xyss.shengming);
         printf("防御：%4d    速度：%4d\n",(int)xyss.fangyu,(int)xyss.sudu);
         printf("暴击：%3d%%    爆伤：%3d%%\n",(int)(xyss.baoji*100),(int)(xyss.baojishanghai*100));
-        printf("经验：%d\n",(int)(xyss.jinyan));
+if(xyss.level%2==1){
+        tshengjijinyan=(long int)(2.5*pow(xyss.level,3)+25*pow(xyss.level,2)-12.5*xyss.level+165);
+    }else{
+        tshengjijinyan=(long int)(2.5*pow(xyss.level,3)+22.5*pow(xyss.level,2)-10*xyss.level+150);
+    }
+      printf("经验：%d/%d\n",(int)(xyss.jinyan),(int)(tshengjijinyan));
 		printf("  1    返回\n");
 		c=getchar();
 		switch(c){
@@ -264,7 +312,7 @@ system("clear");printf("游戏已退出\n");q=1;break;
 	};
 	fread(&diren1,sizeof(diren1),1,fp2);
     fclose(fp2);
-	zc=Zhanchang(xyss,diren1);zc.run();getchar();break;
+	zc=Zhanchang(xyss,diren1,skill);zc.run();getchar();getchar();break;
 	case '3':system("clear");printf("游戏已退出\n");q=1;break;
 };
 
