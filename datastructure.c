@@ -1,6 +1,7 @@
 #include <datastructure.h>
-
-void LinkLIst::add(Object object){
+//链表类函数的实现
+//待优化
+void LinkList::add(Object object){
 	if (this->head==NULL){
 
 		LinkListNode linkListNode=LinkListNode();
