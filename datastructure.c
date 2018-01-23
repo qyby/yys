@@ -14,3 +14,7 @@ void LinkList::add(Object object){
 	linkListNode->object=object;
 }
 
+Object::Object(){}
+Object::Object(int id){
+    id=this.id;
+}

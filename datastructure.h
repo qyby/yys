@@ -3,13 +3,19 @@
 #define DATASTRUCTURE_H
 //定义物体类,作为一切可显示物体的父类
 class Object{
-	void toShow();
-}
+    public:
+	int id;
+    void toShow();
+    Object();
+    Object(int id);
+};
+
 //定义链表节点类
 class LinkListNode{
+    public:
 	LinkListNode *next;
 	Object *object;
-}
+};
 //定义链表类
 class LinkList{
 	public:
@@ -17,7 +23,7 @@ class LinkList{
 		LinkListNode *tail;
 		void add(Object);
 		void del(Object);
-}
+};
 
 
 
