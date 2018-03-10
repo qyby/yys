@@ -63,6 +63,9 @@ public:
 }
 };
 */
+//function declaration
+void zhandou_interface(char *);
+
 	class Skill{
     public:
     int skillNumber;
@@ -85,6 +88,7 @@ public:
 	int jindu;
 	int zhandoujieshu;
 	Skill *skill;
+    int w=0;//箭头计数器
 Zhanchang(){}
 Zhanchang(Shishen a,Shishen b,Skill *sk){
 	//AA=Zhanchangshishen(a);
@@ -97,10 +101,19 @@ Zhanchang(Shishen a,Shishen b,Skill *sk){
 	zhandoujieshu=0;
 	skill=sk;
 }
-	void dayinzhanchang(){
+void dayinzhanchang(){
+    system("clear");
+    printf("LV%2d %s      LV%2d %s\n",A.level,A.name,B.level,B.name);
+    printf("%4d/%4d      %4d/%4d\n",(int)A.zhanchangshengming,(int)A.shengming,(int)B.zhanchangshengming,(int)B.shengming);}
+	void dayinzhanchang(int w){
 	system("clear");
 	printf("LV%2d %s      LV%2d %s\n",A.level,A.name,B.level,B.name);
-	printf("%4d/%4d      %4d/%4d\n",(int)A.zhanchangshengming,(int)A.shengming,(int)B.zhanchangshengming,(int)B.shengming);
+
+    if(w==0){
+	printf("%4d/%4d ---> %4d/%4d\n",(int)A.zhanchangshengming,(int)A.shengming,(int)B.zhanchangshengming,(int)B.shengming);}
+    else{
+    printf("%4d/%4d <--- %4d/%4d\n",(int)A.zhanchangshengming,(int)A.shengming,(int)    B.zhanchangshengming,(int)B.shengming);
+    }
 	}
 	void run(){
 	while(zhandoujieshu!=1){
@@ -131,27 +144,31 @@ bao=0;
 }
 nigong=gong.gongji*sk[skillNumber].gongjibili*pow(gong.baojishanghai,bao);
 shigong=nigong*350/(300+fang.fangyu*(1-sk[skillNumber].bilijianfang));
+
 return shigong;
 }
 	int beat(Shishen &gong,Shishen &fang,Skill *sk){
 	    double  shigong=0;
 	    int bao=0;
+        
 	    shigong=atk(gong,fang,1,sk,bao);
-	dayinzhanchang();
+        fang.zhanchangshengming=fang.zhanchangshengming-shigong;
+        if(fang.zhanchangshengming<=0){                    
+            fang.zhanchangshengming=0;
+     dayinzhanchang();
+     printf("%s死亡了！\n",fang.name);
+     zhandoujieshu=1;
+     return 1;
+        }
+	dayinzhanchang(w);
+    if(w==0){
+        w=1;}
+    else{
+        w=0;}
 	printf("%s对%s造成了\e[3%d;1m %d \e[0m点伤害\n",gong.name,fang.name,7-bao*4,(int)shigong);
 	sleep(1);
-	if(fang.zhanchangshengming<=shigong){
-    fang.zhanchangshengming=0;
-	dayinzhanchang();
-	printf("%s死亡了！\n",fang.name);
-
-	zhandoujieshu=1;
-	return 1;
-	}else{
-	fang.zhanchangshengming=fang.zhanchangshengming-shigong;
-	return 0;
-}
-}
+    return 0;
+	}
 void  chongsuanmianban(Shishen &a){
 a.gongji=a.chushigongji*pow(1.055,a.level-1);
 a.shengming=a.chushishengming*pow(1.048,a.level-1);
@@ -299,23 +316,20 @@ if(xyss.level%2==1){
 
 system("clear");printf("游戏已退出\n");q=1;break;
 		};break;
-	case '2':system("clear");
-		if((fp2=fopen("xianyoushishen.dat","rb"))==NULL){
-		printf("cant open file");
-		exit(0);
-	};
-	fread(&xyss,sizeof(xyss),1,fp2);
-	    fclose(fp2);
-		if((fp2=fopen("diren1.dat","rb"))==NULL){
-		printf("cant open file");
-		exit(0);
-	};
-	fread(&diren1,sizeof(diren1),1,fp2);
-    fclose(fp2);
-	zc=Zhanchang(xyss,diren1,skill);zc.run();getchar();getchar();break;
+	case '2':
+        zhandou_interface("diren1.dat");
+        getchar();getchar();break;
 	case '3':system("clear");printf("游戏已退出\n");q=1;break;
 };
 
 }
+
 return 0;
+}
+//loading diren and start to fight
+void zhanduo_interface(char *diren_filename){
+system("clear");         
+if((fp2=fopen("xianyoushishen.dat","rb"))==NULL){                                       printf("cant open file");                                                               exit(0);    
+};                                                                                      fread(&xyss,sizeof(xyss),1,fp2);                                                            fclose(fp2); 
+if((fp2=fopen(diren_filename,"rb"))==NULL){                                               printf("cant open file");                                                               exit(0);                                                                            };                                                                                      fread(&diren1,sizeof(diren1),1,fp2);                                                    fclose(fp2);                                                                            zc=Zhanchang(xyss,diren1,skill);zc.run();
 }
